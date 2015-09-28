@@ -43,7 +43,7 @@ module.exports = function(passport) {
 
 	// spotify will send back the token and profile
 	function(token, refreshToken, profile, done) {
-		// console.log('token: ' + token);
+		console.log('token: ' + token);
 		// console.log('refreshToken: ' + refreshToken);
 		// console.dir(profile);
 

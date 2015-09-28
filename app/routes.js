@@ -1,4 +1,9 @@
+var token = '';
+
 module.exports = function(app, passport) {
+
+	// var test = 'another test';
+
 	// ====================================
 	// HOME PAGE (with login links) =======
 	// ====================================
@@ -30,16 +35,21 @@ module.exports = function(app, passport) {
 
 	// we will want this protected so you have to be logged in to visit
 	// we will use route middleware to verify this (the isLoggedIn function)
-	app.get('/profile', isLoggedIn, function(req, res){
+	app.get('/profile', ensureAuthenticated, function(req, res){
 		res.render('profile.ejs', {
 			user: req.user // get the user out of session and pass to template
 		});
 
 		// initalize spotify node api
 		var SpotifyWebApi = require('spotify-web-api-node');
+		console.log('api triggered');
 
 		// load the auth variables
 		var configAuth = require('../config/auth');
+		console.log('configAuth triggered');
+
+		var passportAuth = require('../config/passport');
+		console.log('passportAuth triggered');
 
 		// credentials are optional
 		var spotifyApi = new SpotifyWebApi({
@@ -48,16 +58,53 @@ module.exports = function(app, passport) {
 		  redirectUri : configAuth.spotifyAuth.callbackURL
 		});
 
-		console.log(spotifyApi);
+		
+		spotifyApi.clientCredentialsGrant()
+	  		.then(function(data) {
+	  			console.log('clientCredentialsGrant called');
+		    	console.log('The access token expires in ' + data.body['expires_in']);
+		    	console.log('The access token is ' + data.body['access_token']);
+	    		spotifyApi.setAccessToken(data.body['access_token']);
+		    	spotifyApi.getUserPlaylists('phrichards')
+  					.then(function(data) {
+    					console.log('Retrieved playlists', data.body);
+    					data.body.items.forEach(function(i){
+    						if (i.name.indexOf('Gumscraper') > -1) {
+    							console.log('yes test');
+    						} else {
+    							if (req.user) {
+    								console.log('logged in');
+    							}
+    							spotifyApi.createPlaylist('phrichards', 'Gumscraper', { 'public' : false })
+    							 	.then(function(data) {
+    							    	console.log('Created playlist!');
+    								}, function(err) {
+							    		console.log('Something went wrong!', err);
+							  		});
+    						}
+    					}) 
+  					},function(err) {
+    					console.log('Something went wrong!', err);
+  					});
+		    	});
+		  	}, function(err) {
+		    	console.log('Something went wrong when retrieving an access token', err.message);
+  			});
 
-	});
 
 	// ====================================
 	// SPOTIFY ROUTES =====================
 	// ====================================		
 
 	// route for spotify authentication and login
-	app.get('/auth/spotify', passport.authenticate('spotify', {scope: ['playlist-read-private', 'playlist-modify-private']}));
+	// app.get('/auth/spotify', passport.authenticate('spotify', {scope: ['playlist-read-private', 'playlist-modify-private', 'playlist-modify-public']}));
+
+	app.get('/auth/spotify',
+  		passport.authenticate('spotify', {scope: ['playlist-read-private', 'playlist-modify-private', 'playlist-modify-public']}),
+  		function(req, res){
+   			// The request will be redirected to spotify for authentication, so this
+			// function will not be called.
+		});
 
 	// handle the callback after spotify has authenticated the user
 	app.get('/auth/spotify/callback',
@@ -92,3 +139,13 @@ function isLoggedIn(req, res, next){
 	// if they aren't, redirect them to the home page
 	res.redirect('/');
 };
+
+function ensureAuthenticated(req, res, next) {
+	if (req.isAuthenticated()) {
+		console.log('ensureAuthenticated yes');
+		return next();
+	} else {
+		res.redirect('/');
+		console.log('not authenticated');
+	}
+}
