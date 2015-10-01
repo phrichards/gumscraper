@@ -38,11 +38,12 @@ module.exports = function(passport) {
 		// pull in our app id and secret from our auth.js file
 		clientID: configAuth.spotifyAuth.clientID,
 		clientSecret: configAuth.spotifyAuth.clientSecret,
-		callbackURL: configAuth.spotifyAuth.callbackURL
+		callbackURL: configAuth.spotifyAuth.callbackURL,
+		passReqToCallback: true
 	},
 
 	// spotify will send back the token and profile
-	function(token, refreshToken, profile, done) {
+	function(req, token, refreshToken, profile, done) {
 		console.log('token: ' + token);
 		// console.log('refreshToken: ' + refreshToken);
 		// console.dir(profile);
@@ -50,9 +51,12 @@ module.exports = function(passport) {
 		// asynchronous
 		process.nextTick(function(){
 
+			req.session.SpotifyAccessToken = token;
+			req.session.SpotifyRefreshToken = refreshToken;
+
 			// find the user in the database based on their spotify id
 			User.findOne({'spotify.id' : profile.id}, function(err, user){
-				console.log(user);
+				// console.log(user);
 
 				// if there is an error, stop everything and return that
 				// ie an error connecting to the database
@@ -61,7 +65,7 @@ module.exports = function(passport) {
 
 				// if the user is found, then log them in
 				if (user) {
-					return done(null, user); // user found, return that user
+					return done(null, user, token); // user found, return that user
 				} else {
 					// if there is no user found with that spotify id, create them
 					var newUser = new User();
@@ -75,7 +79,7 @@ module.exports = function(passport) {
 							throw err;
 
 						// if successful, return the new user
-						return done(null, newUser);
+						return done(null, newUser, token);
 					});
 				}
 			});
