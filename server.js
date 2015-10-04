@@ -5,6 +5,8 @@ var app      = express();
 var port     = process.env.PORT || 8081;
 var mongoose = require('mongoose');
 var passport = require('passport');
+var request = require('request');
+var cheerio = require ('cheerio');
 // var playlistBuilder = require('/config/playlist-builder'); 
 var flash    = require('connect-flash');
 
