@@ -43,21 +43,37 @@ module.exports = function(app, passport) {
 
 	// process the login form
 	app.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/profile', // redirect to the secure profile section
+		successRedirect : '/scrape', // redirect to the scrape page
 		failureRedirect : '/login', // redirect to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
 
+	// ====================================
+	// SUCCESS ============================
+	// ====================================
+
+	app.get('/success', function(req, res){
+		// render the page and pass in any flash data if it exists
+		res.render('success.ejs', {message: req.flash('loginMessage')});
+	});
 
 	// ====================================
-	// PROFILE SECTION ====================
+	// ERROR ==============================
 	// ====================================
 
-	// we will want this protected so you have to be logged in to visit
-	// we will use route middleware to verify this (the isLoggedIn function)
-	app.get('/profile', ensureAuthenticated, function(req, res){
+	app.get('/error.ejs', function(req, res){
+		// render the page and pass in any flash data if it exists
+		res.render('error.ejs', {message: req.flash('loginMessage')});
+	});
+
+	// ====================================
+	// SCRAPE SECTION =====================
+	// ====================================
+
+	app.get('/scrape', ensureAuthenticated, function(req, res){
+		console.log(req);
 		console.log(req.session.SpotifyAccessToken);
-		res.render('profile.ejs', {
+		res.render('scrape.ejs', {
 			user: req.user // get the user out of session and pass to template
 		});
 
@@ -76,9 +92,7 @@ module.exports = function(app, passport) {
 
 						var alreadyExists = playlists.filter(function(el){
 							return (el.name === 'Gumscraper');
-						})
-
-						// console.log(alreadyExists);
+						});
 
 						// If it exists, get the ID
 
@@ -91,7 +105,6 @@ module.exports = function(app, passport) {
 							spotifyApi.createPlaylist('phrichards', 'Gumscraper', { 'public' : false })
 						 	.then(function(data) {
 						    	console.log(' Created playlist!');
-						    	// res.redirect('/scrape');
 							}, function(err) {
 					    		console.log('Something went wrong!', err);
 					  		});
@@ -117,7 +130,7 @@ module.exports = function(app, passport) {
 	app.get('/auth/spotify/callback',
   		passport.authenticate('spotify', { failureRedirect: '/' }),
   		function(req, res) {
-    		res.redirect('/profile');
+    		res.redirect('/scrape');
   		});
 
 	// route for logging out
@@ -277,40 +290,30 @@ function scrape(page, id) {
 			console.log('checkplaylist called');
 			spotifyApi.getPlaylist('phrichards', playlistID)
 			  .then(function(data) {
-			  	var songsInPlaylist = _.map(data.body.tracks.items, function(item){
-			  		return (item.track.name);
+			  	var playlistSongIDs = _.map(data.body.tracks.items, function(item){
+			  		return (item.track.id);
 			  	});
-			  	console.log(songs);
-			  	var titles = [];
-			  	_.each(songs, function(song){
-			  		var start = song.indexOf('– “')+2;
-			  		var end = song.indexOf('”');
-			  		var title = song.substring(start+1, end);
-			  		if (title.length) {
-			  			titles.push(song);
-			  		}
-			  	});
-
-			  	var newSongs = _.difference(titles, songsInPlaylist);
-			  	// console.log(titles);
-			  	// console.log(songsInPlaylist);
-			  	console.log(newSongs);
-			  	getSongs(newSongs);
+			  	getSongs(songs, playlistSongIDs);
 			  }, function(err) {
 			    console.log('Something went wrong!', err);
 			  });
 		}
 
 		// Search Spotify for songs in the array
-		function getSongs(songs){
+		function getSongs(songs, playlistSongIDs){
 			var count = 0;
+			var newSongs = [];
 			console.log('getsongs called');
-			console.log(songs);
+			// console.log(songs);
+			// console.log(playlistSongIDs);
 			_.each(songs, function(song) {
 				if (song.length) {
 					spotifyApi.searchTracks(song)
 			  		.then(function(data) {
-			    		addToPlaylist(data.body.tracks.items[0].id);
+			    		// console.log(data.body.tracks.items[0].id);
+			    		if (!_.contains(playlistSongIDs, data.body.tracks.items[0].id)) {
+			    			addToPlaylist(data.body.tracks.items[0].id);
+			    		}
 			    		
 			  		}, function(err) {
 			    		console.error(err);
