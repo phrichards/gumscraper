@@ -134,7 +134,7 @@ module.exports = function(app, passport) {
 		}
 	);
 
-	app.get('/auth/spotify/callback',
+	app.get('/callback',
   		passport.authenticate('spotify', { failureRedirect: '/' }),
   		function(req, res) {
     		res.redirect('/scrape');
