@@ -20,7 +20,7 @@ var session      = require('express-session');
 var configDB = require('./config/database.js');
 
 // configuration ===============================================================
-mongoose.connect(configDB.url); // connect to our database
+mongoose.connect('mongodb://heroku_ksjkz1zn:ksp1708i3185m82kt0fua53lh4@ds059185.mongolab.com:59185/heroku_ksjkz1zn'); // connect to our database
 
 require('./config/passport')(passport); // pass passport for configuration
 
