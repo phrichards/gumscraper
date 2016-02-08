@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Gumscraper</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style/style.css">
+	<style>
+		body{padding-top: 80px; word-wrap: break-word;}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="jumbotron text-center">
+			<h1>Gumscraper</h1>
+			<h3>Your playlist is ready! Check it out <a href="{{@playlistURL}}">here or listen below</a>.</h3>
+			<iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aphrichards%3Aplaylist%3A{{@playlistID}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+
+		</div>
+	</div>
+
+	<!-- <div class="row">
+		<div class="col-sm-6">
+			<div class="well">
+				<iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aphrichards%3Aplaylist%5uW0Y88uOb4oxLolU8dTd4" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+				http://open.spotify.com/user/phrichards/playlist/5uW0Y88uOb4oxLolU8dTd4
+				Your playlist is ready! Check it out <a href="<%= playlistURL %>">here</a>. If that link doesn't work, try refreshing the page. I'm working on that.
+			</div>
+		</div>
+	</div> -->
+</body>
+</html>

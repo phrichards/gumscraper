@@ -3,6 +3,11 @@ var SpotifyWebApi = require('spotify-web-api-node');
 
 var _ = require('underscore-node');
 var _s = require('underscore.string');
+var async = require('async');
+
+var hbs = require('hbs');
+var q = require('q');
+
 
 // load the auth variables
 var configAuth = require('../config/auth');
@@ -20,6 +25,10 @@ var spotifyApi = new SpotifyWebApi({
   redirectUri : configAuth.spotifyAuth.callbackURL
 });
 
+var playlistID;
+var playlistURL;
+var username;
+
 module.exports = function(app, passport) {
 
 	// var test = 'another test';
@@ -28,7 +37,7 @@ module.exports = function(app, passport) {
 	// HOME PAGE (with login links) =======
 	// ====================================
 	app.get('/', function(req, res){
-		res.render('index.ejs'); // load the index.ejs file
+		res.render('index.html'); // load the index.html file
 	});
 
 	// ====================================
@@ -38,7 +47,7 @@ module.exports = function(app, passport) {
 	// show the login form
 	app.get('/login', function(req, res){
 		// render the page and pass in any flash data if it exists
-		res.render('login.ejs', {message: req.flash('loginMessage')});
+		res.render('login.html', {message: req.flash('loginMessage')});
 	});
 
 	// process the login form
@@ -49,69 +58,67 @@ module.exports = function(app, passport) {
 	}));
 
 	// ====================================
-	// SUCCESS ============================
-	// ====================================
-
-	app.get('/success', function(req, res){
-		// render the page and pass in any flash data if it exists
-		res.render('success.ejs', {message: req.flash('loginMessage')});
-	});
-
-	// ====================================
-	// ERROR ==============================
-	// ====================================
-
-	app.get('/error.ejs', function(req, res){
-		// render the page and pass in any flash data if it exists
-		res.render('error.ejs', {message: req.flash('loginMessage')});
-	});
-
-	// ====================================
 	// SCRAPE SECTION =====================
 	// ====================================
 
 	app.get('/scrape', ensureAuthenticated, function(req, res){
-		console.log(req);
+		console.log('this is scrape');
 		console.log(req.session.SpotifyAccessToken);
-		res.render('scrape.ejs', {
-			user: req.user // get the user out of session and pass to template
+		res.render('scrape.html', {
+			user: req.user, // get the user out of session and pass to template
+			playlistID: playlistID,
+			playlistURL: playlistURL
 		});
 
 		spotifyApi.setAccessToken(req.session.SpotifyAccessToken);
 		exists = false;
-	    		// res.redirect('/create');
-	    	return spotifyApi.getUserPlaylists('phrichards')
-					.then(function(data) {
-						console.log('playlists retrieved');
+		username = req.user.spotify['id'];
+    	return spotifyApi.getUserPlaylists(username)
+				.then(function(data) {
+					console.log('playlists retrieved');
+					hbs.localsAsTemplateData(app);
 
-						// Loop through playlist objects in api response and create array of titles
-						var playlists = data.body.items;
+					// Loop through playlist objects in api response and create array of titles
+					var playlists = data.body.items;
 
-						// Find out if Gumscraper playlist exists
-						// This will return an array of one item if it exists
+					// Find out if etlastper playlist exists
+					// This will return an array of one item if it exists
 
-						var alreadyExists = playlists.filter(function(el){
-							return (el.name === 'Gumscraper');
-						});
-
-						// If it exists, get the ID
-
-						if (alreadyExists.length) {
-							var playlistID = alreadyExists[0].id;
-							console.log(playlistID);
-							getLatestList(playlistID);
-						} else {
-							console.log('doesnt exist');
-							spotifyApi.createPlaylist('phrichards', 'Gumscraper', { 'public' : false })
-						 	.then(function(data) {
-						    	console.log(' Created playlist!');
-							}, function(err) {
-					    		console.log('Something went wrong!', err);
-					  		});
-						}
-					},function(err) {
-					console.log('Something went wrong!', err);
+					var alreadyExists = playlists.filter(function(el){
+						return (el.name === 'Gumscraper');
 					});
+
+					// If it exists, get the ID
+
+					if (alreadyExists.length) {
+						console.log('already Exists');
+						playlistURL = alreadyExists[0].external_urls['spotify'];
+						playlistID = alreadyExists[0].id;
+						console.log(playlistURL);
+						console.log(playlistID);
+						app.locals.playlistURL = playlistURL;
+						app.locals.playlistID = playlistID;
+						console.log(playlistURL);
+						getLatestList();
+					} else {
+						console.log('doesnt exist');
+						spotifyApi.createPlaylist(username, 'Gumscraper', { 'public' : false })
+					 	.then(function(data) {
+					    	console.log('Created playlist!');
+					    	// console.log(data);
+					    	playlistURL = data.body.external_urls['spotify'];
+							playlistID = data.body.id;
+							app.locals.playlistURL = playlistURL;
+							app.locals.playlistID = playlistID;
+							console.log(playlistURL);
+							getLatestList();
+						}, function(err) {
+				    		console.log('Something went wrong!', err);
+				  		});
+					}
+				},function(err) {
+				console.log('Something went wrong!', err);
+				});
 	    	});
 
 
@@ -170,7 +177,7 @@ function ensureAuthenticated(req, res, next) {
 	}
 }
 
-function getLatestList(id) {
+function getLatestList() {
 	var request = require('request');
 	var cheerio = require ('cheerio');
 	var fs = require('fs');
@@ -213,7 +220,7 @@ function getLatestList(id) {
 				postLink = data.find('.post.row').children('.preview-holder').first().children('a').attr('href');
 				console.log(postLink);
 				
-				scrape(postLink, id);
+				scrape(postLink);
 			});
 
 		}
@@ -222,12 +229,12 @@ function getLatestList(id) {
 	// scrape(id);
 }
 
-function scrape(page, id) {
+function scrape(page) {
 
 	console.log('page: ' + page);
-	console.log('ID: ' + id);
+	console.log('ID: ' + playlistID);
 
-	var playlistID = id;
+	// var playlistID = id;
 
 	var request = require('request');
 	var cheerio = require ('cheerio');
@@ -279,7 +286,6 @@ function scrape(page, id) {
 				console.log(data[0]);
 				var songArray = data[0].split(/[0-9]\.\s/);
 				console.log(songArray);
-				// getSongs(songArray);
 				checkPlaylist(songArray);
 			}
 
@@ -288,7 +294,7 @@ function scrape(page, id) {
 		// Check to see if the songs that we've scraped are already on the Spotify playlist
 		function checkPlaylist(songs) {
 			console.log('checkplaylist called');
-			spotifyApi.getPlaylist('phrichards', playlistID)
+			spotifyApi.getPlaylist(username, playlistID)
 			  .then(function(data) {
 			  	var playlistSongIDs = _.map(data.body.tracks.items, function(item){
 			  		return (item.track.id);
@@ -304,15 +310,15 @@ function scrape(page, id) {
 			var count = 0;
 			var newSongs = [];
 			console.log('getsongs called');
-			// console.log(songs);
-			// console.log(playlistSongIDs);
 			_.each(songs, function(song) {
 				if (song.length) {
 					spotifyApi.searchTracks(song)
 			  		.then(function(data) {
-			    		// console.log(data.body.tracks.items[0].id);
+			  			console.log(song);
 			    		if (!_.contains(playlistSongIDs, data.body.tracks.items[0].id)) {
 			    			addToPlaylist(data.body.tracks.items[0].id);
+			    		} else {
+		    				console.log('already on');
 			    		}
 			    		
 			  		}, function(err) {
@@ -320,6 +326,11 @@ function scrape(page, id) {
 			  		});
 				}
 			});
+			console.log('done');
+			// app.render('/scrape', function(req, res, err){
+			// 	console.log(res);
+			// 	if (err) {console.log(err)};
+			// });
 		}
 
 		// Add the found songs to the playlist
@@ -328,7 +339,7 @@ function scrape(page, id) {
 			console.log('playlist id: ' + playlistID);
 			console.log('song id: ' + songID);
 
-			spotifyApi.addTracksToPlaylist('phrichards', playlistID, ["spotify:track:" + songID])
+			spotifyApi.addTracksToPlaylist(username, playlistID, ["spotify:track:" + songID])
 			  .then(function(data) {
 			    console.log('Added tracks to playlist!');
 			  }, function(err) {
