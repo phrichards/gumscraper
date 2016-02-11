@@ -73,53 +73,48 @@ module.exports = function(app, passport) {
 		spotifyApi.setAccessToken(req.session.SpotifyAccessToken);
 		exists = false;
 		username = req.user.spotify['id'];
-    	return spotifyApi.getUserPlaylists(username)
-				.then(function(data) {
-					console.log('playlists retrieved');
-					hbs.localsAsTemplateData(app);
+    	spotifyApi.getUserPlaylists(username)
+			.then(function(data) {
+				console.log('playlists retrieved');
+				hbs.localsAsTemplateData(app);
 
-					// Loop through playlist objects in api response and create array of titles
-					var playlists = data.body.items;
+				// Loop through playlist objects in api response and create array of titles
+				var playlists = data.body.items;
 
-					// Find out if etlastper playlist exists
-					// This will return an array of one item if it exists
+				// Find out if playlist exists
+				// This will return an array of one item if it exists
 
-					var alreadyExists = playlists.filter(function(el){
-						return (el.name === 'Gumscraper');
-					});
+				var alreadyExists = playlists.filter(function(el){
+					return (el.name === 'Gumscraper');
+				});
 
-					// If it exists, get the ID
+				// If it exists, get the ID
 
-					if (alreadyExists.length) {
-						console.log('already Exists');
-						playlistURL = alreadyExists[0].external_urls['spotify'];
-						playlistID = alreadyExists[0].id;
-						console.log(playlistURL);
-						console.log(playlistID);
+				if (alreadyExists.length) {
+					console.log('already Exists');
+					playlistURL = alreadyExists[0].external_urls['spotify'];
+					playlistID = alreadyExists[0].id;
+					app.locals.playlistURL = playlistURL;
+					app.locals.playlistID = playlistID;
+					getLatestList();
+				} else {
+					console.log('doesnt exist');
+					spotifyApi.createPlaylist(username, 'Gumscraper', { 'public' : false })
+				 	.then(function(data) {
+				    	console.log('Created playlist!');
+				    	playlistURL = data.body.external_urls['spotify'];
+						playlistID = data.body.id;
 						app.locals.playlistURL = playlistURL;
 						app.locals.playlistID = playlistID;
-						console.log(playlistURL);
 						getLatestList();
-					} else {
-						console.log('doesnt exist');
-						spotifyApi.createPlaylist(username, 'Gumscraper', { 'public' : false })
-					 	.then(function(data) {
-					    	console.log('Created playlist!');
-					    	// console.log(data);
-					    	playlistURL = data.body.external_urls['spotify'];
-							playlistID = data.body.id;
-							app.locals.playlistURL = playlistURL;
-							app.locals.playlistID = playlistID;
-							console.log(playlistURL);
-							getLatestList();
-						}, function(err) {
-				    		console.log('Something went wrong!', err);
-				  		});
-					}
-				},function(err) {
-				console.log('Something went wrong!', err);
-				});
-	    	});
+					}, function(err) {
+			    		console.log('Something went wrong!', err);
+			  		});
+				}
+			},function(err) {
+			console.log('Something went wrong!', err);
+			});
+    	});
 
 
 	// ====================================
@@ -190,12 +185,6 @@ function getLatestList() {
 
 	var $ = cheerio.load(url);
 
-	
-
-	// The structure of the request call
-	// The first parameter is the URL
-	// The callback function takes 3 params: an error, response status code and the html
-
 	request(url, function(error, resopnse, html){
 		console.log('request called');
 		// First check to make sure no errors occur when making the request
@@ -244,12 +233,6 @@ function scrape(page) {
 
 	url = page;
 	var $ = cheerio.load(url);
-
-	
-
-	// The structure of the request call
-	// The first parameter is the URL
-	// The callback function takes 3 params: an error, response status code and the html
 
 	request(url, function(error, resopnse, html){
 		console.log('request called');
