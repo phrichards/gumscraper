@@ -68,22 +68,12 @@ module.exports = function(app, passport) {
 		exists = false;
 		username = req.user.spotify['id'];
 		req.username = username;
-
 		app.set('username', username);
-
-		// getUserPlaylists(username);
-
-		res.redirect('/profile');
-
-		// res.render('scrape.html', {
-		// 	user: req.user, // get the user out of session and pass to template
-		// 	playlistID: playlistID,
-		// 	playlistURL: playlistURL
-		// });
+		res.redirect('/playlist');
 	});
 
-	app.get('/profile', getUserPlaylists, getLatestList, scrape, checkPlaylist, getSongs, addToPlaylist, function(req, res, next){
-		res.render('profile.html', {
+	app.get('/playlist', getUserPlaylists, getLatestList, scrape, checkPlaylist, getSongs, addToPlaylist, function(req, res, next){
+		res.render('playlist.html', {
 			user: req.user, // get the user out of session and pass to template
 			playlistID: playlistID,
 			playlistURL: playlistURL

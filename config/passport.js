@@ -45,8 +45,6 @@ module.exports = function(passport) {
 	// spotify will send back the token and profile
 	function(req, token, refreshToken, profile, done) {
 		console.log('token: ' + token);
-		// console.log('refreshToken: ' + refreshToken);
-		// console.dir(profile);
 
 		// asynchronous
 		process.nextTick(function(){
@@ -56,7 +54,6 @@ module.exports = function(passport) {
 
 			// find the user in the database based on their spotify id
 			User.findOne({'spotify.id' : profile.id}, function(err, user){
-				// console.log(user);
 
 				// if there is an error, stop everything and return that
 				// ie an error connecting to the database
