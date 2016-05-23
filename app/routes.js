@@ -72,7 +72,7 @@ module.exports = function(app, passport) {
 		res.redirect('/playlist');
 	});
 
-	app.get('/playlist', getUserPlaylists, getLatestList, scrape, checkPlaylist, getSongs, addToPlaylist, function(req, res, next){
+	app.get('/playlist', getUserPlaylists, getLatestList, scrape, checkPlaylist, getSongs, function(req, res, next){
 		res.render('playlist.html', {
 			user: req.user, // get the user out of session and pass to template
 			playlistID: playlistID,
@@ -239,12 +239,11 @@ function getSongs(req, res, next){
 }
 
 // Add the found songs to the playlist
-function addToPlaylist(songID, req, res, next) {
+function addToPlaylist(songID) {
 
 	spotifyApi.addTracksToPlaylist(username, playlistID, ["spotify:track:" + songID])
 	  .then(function() {
 	    console.log('Added tracks to playlist!');
-	    return next();
 	  }, function(err) {
 	    console.log('Something went wrong!', err);
 	});
