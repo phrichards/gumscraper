@@ -1,13 +1,15 @@
 var gulp = require('gulp');
+var concat = require('gulp-concat');
 var sass = require('gulp-sass');
 
 gulp.task('styles', function() {
-    gulp.src('**/*.scss')
+    gulp.src('style/*.scss')
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest('../style/'))
+        .pipe(concat('style.css'))
+        .pipe(gulp.dest('./'))
 });
 
 //Watch task
 gulp.task('default',function() {
-    gulp.watch('**/*.scss',['styles']);
+    gulp.watch('style/*.scss',['styles']);
 });

@@ -6,20 +6,29 @@
 	    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
     	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
     	<link rel="stylesheet" href="/style/style.css">
+    	<link rel="stylesheet" href="/style/materialize.min.css">
     	<link href='https://fonts.googleapis.com/css?family=ABeeZee|Cantarell' rel='stylesheet' type='text/css'>
-    	<style>
-			body {padding-top: 80px;}
-    	</style>
 </head>
-<body>
+<body class="green accent-4">
+	<nav class="nav-wrapper white">
+		<ul class="right">
+			<li>
+				<a href="http://phrichards.ca" class="btn green accent-4 pull-s6 col s6">phrichards.ca</a>
+			</li>
+		</ul>
+	</nav>
 	<div class="container">
-		<div class="jumbotron text-center">
+		<div class="col s12">
 			<h1>Gumscraper</h1>
-			<p>Click below to generate a Spotify playlist based on <a href="http://www.stereogum.com/category/franchises/the-5-best-songs-of-the-week/">Stereogum's top 5 songs of the week</a>. <br> If you've run this app before, your existing playlist will be updated.</p>
-			<a href="/auth/spotify" class="btn btn-primary"><span class="fa fa-spotify"></span> Make my playlist!</a>
+			<div class="card-panel lighten-1">
+				<p>Click below to generate a Spotify playlist from <a href="http://www.stereogum.com/category/franchises/the-5-best-songs-of-the-week/">Stereogum's top 5 songs of the week</a>. <br> If you've run this app before, your existing playlist will be updated.</p>
+				<a href="/auth/spotify" class="waves-effect waves-light btn btn-large green accent-4"><span class="fa fa-spotify"></span> Make my playlist!</a>
+			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  	<script type="text/javascript" src="js/materialize.min.js"></script>
 	<script src="/app/app.js"></script>
 </body>
 </html>

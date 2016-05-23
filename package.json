@@ -12,6 +12,7 @@
     "express": "~4.0.0",
     "express-session": "~1.0.0",
     "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
     "gulp-sass": "^2.2.0",
     "hbs": "^4.0.0",
     "method-override": "~1.0.0",

@@ -6,18 +6,27 @@
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <link rel="stylesheet" href="style/style.css">
-	<style>
-		body{padding-top: 80px; word-wrap: break-word;}
-	</style>
+    <link rel="stylesheet" href="/style/materialize.min.css">
 </head>
-<body>
+<body class="green accent-4">
+	<nav class="nav-wrapper white">
+		<ul class="right">
+			<li>
+				<a href="http://phrichards.ca" class="btn green accent-4 pull-s6 col s6">phrichards.ca</a>
+			</li>
+		</ul>
+	</nav>
 	<div class="container">
-		<div class="jumbotron text-center">
+		<div class="col s12">
 			<h1>Your playlist is ready!</h1>
-			<h3>Check it out <a href="{{playlistURL}}">here</a> or listen below.</h3>
-			<iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aphrichards%3Aplaylist%3A{{playlistID}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+			<div class="card-panel lighten-1">
+				<h3>Check it out <a href="{{playlistURL}}">here</a> or listen below.</h3>
+				<iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aphrichards%3Aplaylist%3A{{playlistID}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+			</div>
 
 		</div>
 	</div>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  	<script type="text/javascript" src="js/materialize.min.js"></script>
 </body>
 </html>

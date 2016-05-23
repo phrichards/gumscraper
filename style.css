@@ -1,0 +1,25 @@
+body {
+  background: #25292A; }
+
+.jumbotron {
+  background: #25292A;
+  color: #fff;
+  padding-left: 100px;
+  padding-right: 100px; }
+
+.btn-primary {
+  background-color: #5EB359;
+  border-color: #5EB359;
+  color: #fff; }
+
+h1 {
+  padding-bottom: 50px; }
+
+p {
+  padding-bottom: 50px; }
+
+h3 {
+  padding-bottom: 20px; }
+
+a.btn {
+  font-size: 30px; }
