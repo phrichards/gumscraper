@@ -30,14 +30,14 @@ h1 {
 }
 
 p {
-	padding-bottom: 50px;
+	padding-bottom: 30px;
 	font-size: 25px;
 	padding-top: 20px;
-	color: #00C853;
+	color: white;
 }
 
 p a {
-	color: #00C853;
+	color: white;
 	text-decoration: underline;
 }
 
